@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Fee{% endblock %}
+
+{% block content %}
+    <h1>Bitcoin Transaction Fee Predictor</h1>
+
+    {% if btc_price %}
+        <p><strong>Current BTC Price:</strong> {{ btc_price }} USD</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Transaction Size (bytes):</label>
+        <input type="text" name="size" required><br><br>
+
+        <label>Inputs:</label>
+        <input type="text" name="inputs" required><br><br>
+
+        <label>Outputs:</label>
+        <input type="text" name="outputs" required><br><br>
+
+        <label>Value (BTC):</label>
+        <input type="text" name="value_btc" required><br><br>
+
+        <button type="submit">Predict Fee</button>
+    </form>
+
+    {% if prediction %}
+        <h2>Predicted Fee (BTC total): {{ prediction }}</h2>
+        {% if fee_usd %}
+            <h3>Predicted Fee in USD: {{ fee_usd|round(2) }}</h3>
+        {% endif %}
+        {% if prediction_sats_per_byte %}
+            <h3>Predicted Fee Rate: {{ prediction_sats_per_byte|round(2) }} sat/byte</h3>
+        {% endif %}
+        {% if priority %}
+            <h3>Confirmation Time Estimate: {{ priority }}</h3>
+        {% endif %}
+
+        <!-- Fee Comparison Dashboard -->
+        {% if network_fee %}
+            <h3>Network Average Fee (BTC total): {{ network_fee|round(8) }}</h3>
+        {% endif %}
+        {% if network_fee_usd %}
+            <h3>Network Average Fee in USD: {{ network_fee_usd|round(4) }}</h3>
+        {% endif %}
+        {% if network_fee_rate %}
+            <h3>Network Fee Rate: {{ network_fee_rate }} sat/byte</h3>
+        {% endif %}
+        {% if comparison %}
+            <h3>
+                Difference from Network (sat/byte basis): 
+                <span class="{{ badge_class }}" title="
+                    {% if badge_class == 'badge badge-success' %}
+                        Close to network rate (±20%)
+                    {% elif badge_class == 'badge badge-warning' %}
+                        Moderately off (±100%)
+                    {% else %}
+                        Far off prediction
+                    {% endif %}
+                ">
+                    {{ comparison|round(2) }} %
+                </span>
+            </h3>
+        {% endif %}
+
+        <!-- Badge Legend -->
+        <div style="margin-top:15px; font-size: 13px; color:#555;">
+            <strong>Legend:</strong>
+            <span class="badge badge-success">Green</span> = Close to network rate (±20%) |
+            <span class="badge badge-warning">Yellow</span> = Moderately off (±100%) |
+            <span class="badge badge-danger">Red</span> = Far off prediction
+        </div>
+    {% endif %}
+{% endblock %}
+
+    
